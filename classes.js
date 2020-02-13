@@ -1,5 +1,5 @@
 // Sky Hoffert
-// Classes for saeg.
+// Classes for Stymphalian Zero.
 
 class GameObject {
     constructor(x,y,z,c) {
@@ -53,6 +53,7 @@ class DebugUI extends GameObject {
         this.width = 140;
         this.height = 100;
         this.visible = true;
+        this.type = "DebugUI";
 
         this.lines = [
             "w: move toward cursor",
@@ -86,6 +87,7 @@ class DebugUI extends GameObject {
 class MenuButton extends GameObject {
     constructor(x,y,w,h,t,tc,f,rect={}) {
         super(x,y,100,"white");
+        this.type = "MenuButton";
         this.width = w;
         this.height = h;
         this.text = t;
@@ -127,6 +129,7 @@ class MenuButton extends GameObject {
 class TitleButton extends MenuButton {
     constructor() {
         super(WIDTH/2,50,0,0,"Stymphalian Zero","white","80px Monospace");
+        this.type = "TitleButton";
     }
 
     Draw(c) {
@@ -151,6 +154,7 @@ class MainMenuUI extends GameObject {
     constructor() {
         super(0,0,100,"white");
         this.mouse = {x:0,y:0};
+        this.type = "MainMenuUI";
 
         this.buttons = [];
 
@@ -231,6 +235,7 @@ class LevelsUI extends GameObject {
     constructor() {
         super(0,0,100,"white");
         this.mouse = {x:0,y:0};
+        this.type = "LevelsUI";
 
         this.buttons = [];
 
@@ -322,6 +327,7 @@ class LoadUI extends GameObject {
         this.loadPercent = 0.01;
         this.active = true;
         this.elapsed = 0;
+        this.type = "LoadUI";
     }
 
     Tick(dT) {
@@ -355,6 +361,7 @@ class LoadUI extends GameObject {
 class PauseUI extends GameObject {
     constructor() {
         super(0,0,100,"white");
+        this.type = "PauseUI";
 
         this.mouse = {x:0,y:0};
         this.buttons = [];
@@ -433,6 +440,7 @@ class GameUI extends GameObject {
         this.mouse = {x:0,y:0};
         this.buttons = [];
         this.gameStage = gs;
+        this.type = "GameUI";
         
         this.fading = true;
         this.fadingTimeMax = 2000;
@@ -512,6 +520,7 @@ class IntroUI extends GameObject {
     constructor(gs) {
         super(0,0,90,"white");
         this.gameStage = gs;
+        this.type = "IntroUI";
 
         this.timeRemaining = 160000;
         this.resourcesCollected = 0;
@@ -543,6 +552,7 @@ class PlayerUI extends GameObject {
     constructor(p) {
         super(0,0,100,"black");
         this.player = p;
+        this.type = "PlayerUI";
     }
 
     Draw(c) {
@@ -1060,7 +1070,7 @@ class Asteroid extends GameObject{
                 tries++;
             }
 
-            this.boomAudio.volume = this.size/60;
+            //this.boomAudio.volume = this.size/60; // DEBUG: old
             this.boomAudio.play();
         }
     }
@@ -1107,6 +1117,7 @@ class AsteroidSpawner extends GameObject {
         this.minSize = minS;
         this.maxSize = maxS;
         this.gameStage = gs;
+        this.type = "AsteroidSpawner";
 
         this.spawnTimerMax = r;
         this.spawnTimer = this.spawnTimerMax*Math.random();
@@ -1132,16 +1143,22 @@ class AsteroidSpawner extends GameObject {
     }
 }
 
-class Star extends GameObject {
-    constructor(x,y,s,c,gs) {
+class Stars extends GameObject {
+    constructor(x,y,s,n,c,gs) {
         super(x,y,-100,c);
         this.size = s;
         this.gameStage = gs;
         this.brightness = 1;
+        this.nStars = n;
         this.flickerFreq = (Math.random()+0.2)/100;
         this.flickerMag = 0.2;
         this.brightnessMin = 0.2;
         this.elapsed = 0;
+        this.type = "Stars";
+        this.poss = [];
+        for (let i = 0; i < this.nStars; i++) {
+            this.poss.push({x:(Math.random()-0.5)*this.size+this.x,y:(Math.random()-0.5)*this.size+this.y,s:Math.random()*2});
+        }
     }
 
     Tick(dT) {
@@ -1152,15 +1169,12 @@ class Star extends GameObject {
     Draw(c) {
         let p = this.gameStage.camera.ScreenPosition(this.x,this.y);
 
-        // TODO: is this the best way?
-        if (p.x/10 < 0 || p.x/10 > WIDTH || p.y/10 < 0 || p.y/10 > HEIGHT) { return; }
-
-        c.beginPath();
-        c.arc(p.x/10,p.y/10,this.size,0,TWOPI);
         c.fillStyle = this.color;
-        c.globalAlpha = this.brightness;
-        c.fill();
-        c.globalAlpha = 1;
+        for (let i = 0; i < this.nStars; i++) {
+            c.beginPath();
+            c.arc(p.x/10+this.poss[i].x,p.y/10+this.poss[i].y,this.poss[i].s,0,TWOPI);
+            c.fill();
+        }
     }
 }
 
@@ -1481,6 +1495,7 @@ class InGameDialogue extends GameObject {
         this.width = w;
         this.text = t;
         this.font = f;
+        this.type = "InGameDialogue";
 
         this.lifetime = lt;
 
@@ -1512,13 +1527,17 @@ class InGameDialogue extends GameObject {
             AUDIO_introrobot.play();
         } else if (afn === "AUDIO_introrobot2") {
             AUDIO_introrobot2.play();
+        } else if (afn === "AUDIO_introrobot3") {
+            AUDIO_introrobot3.play();
         }
     }
 
     Tick(dT) {
-        this.lifetime -= dT;
-        if (this.lifetime <= 0) {
-            this.active = false;
+        if (this.lifetime > 0) {
+            this.lifetime -= dT;
+            if (this.lifetime <= 0) {
+                this.active = false;
+            }
         }
         if (this.lettersToWrite < this.lettersToWriteMax && this.nextLetterTime > 0) {
             this.nextLetterTime -= dT;
@@ -1601,6 +1620,8 @@ class GameStage {
 
         // TODO: i dont think this must be done every time something is added
         this.AdjustDrawOrder();
+
+        return this.world.length-1;
     }
 
     // Removes an object at index i from the world. This will also cascade to other arrys to keep
@@ -1648,6 +1669,14 @@ class GameStage {
         }
 
         this.world.splice(i,1);
+    }
+
+    RemoveAllTypeOf(t) {
+        for (let i = this.world.length-1; i >= 0; i--) {
+            if (t === this.world[i].type) {
+                this.Remove(i);
+            }
+        }
     }
 
     AdjustDrawOrder() {
@@ -1754,10 +1783,10 @@ class ActionStage extends GameStage {
     
     ToggleMusic() {
         // TODO: should the music be paused or silenced?
-        if (this.bgmusic.paused) {
-            this.bgmusic.play();
+        if (this.bgmusic.volume <= 0) {
+            this.bgmusic.volume = 0.4;
         } else {
-            this.bgmusic.pause();
+            this.bgmusic.volume = 0;
         }
     }
     
@@ -1881,9 +1910,7 @@ class Testground extends ActionStage {
         this.Add(new AsteroidSpawner(-500,-500,3000,-0.1,0.1,-0.1,0.1,10,30,this),"debug");
 
         // DEBUG
-        for (let i = 0; i < 100; i++) {
-            this.Add(new Star((Math.random()-0.5)*WIDTH*20,(Math.random()-0.5)*HEIGHT*20,Math.random()*1.2+0.2,"white",this),"");
-        }
+        this.Add(new Stars(WIDTH/2,HEIGHT/2,1000,100,"white",this),"debug");
 
         this.requiredAudio = [AUDIO_bgmusic];
     }
@@ -1901,14 +1928,14 @@ class IntroLevel extends ActionStage {
         this.camera.ZoomTo(0.7);
         
         // DEBUG: bg stars
-        for (let i = 0; i < 100; i++) {
-            this.Add(new Star((Math.random()-0.5)*WIDTH*16+WIDTH/0.15,(Math.random()-0.5)*HEIGHT*16+HEIGHT/0.15,Math.random()*1.2+0.2,"white",this),"");
-        }
+        this.Add(new Stars(WIDTH/2,HEIGHT/2,1000,40,"white",this),"debug");
 
         this.introUI = new IntroUI();
         this.Add(this.introUI,"debug");
         
-        this.requiredAudio = [AUDIO_bgmusic,AUDIO_introrobot,AUDIO_introrobot2];
+        this.requiredAudio = [AUDIO_bgmusic,AUDIO_introrobot,AUDIO_introrobot2,AUDIO_introrobot3];
+
+        this.aspawners = [];
 
         // TODO: these variables are gross... do it better
         this.introrobotAudioWait = 5000;
@@ -1919,15 +1946,46 @@ class IntroLevel extends ActionStage {
         this.introrobotAudio2 = AUDIO_introrobot2;
         this.introrobotAudio2Done = false;
 
-        this.resourcesCollected = 0;
+        this.introrobotAudio3 = AUDIO_introrobot3;
+        this.introrobotAudio3Done = false;
+
+        this.WIPAppeared = false;
+    }
+
+    ToggleSound() {
+        super.ToggleSound();
+
+        if (AUDIO_boom.volume <= 0) {
+            AUDIO_boom.volume = 1.0;
+        } else {
+            AUDIO_boom.volume = 0;
+        }
+
+        // TODO: this is clunky, make it better.
+        if (this.introrobotAudio.volume <= 0) {
+            this.introrobotAudio.volume = 1;
+        } else {
+            this.introrobotAudio.volume = 0;
+        }
+
+        if (this.introrobotAudio2.volume <= 0) {
+            this.introrobotAudio2.volume = 1;
+        } else {
+            this.introrobotAudio2.volume = 0;
+        }
+
+        if (this.introrobotAudio3.volume <= 0) {
+            this.introrobotAudio3.volume = 1;
+        } else {
+            this.introrobotAudio3.volume = 0;
+        }
     }
 
     Remove(i) {
         for (let j = 0; j < this.terrain.length; j++) {
             if (this.terrain[j] === i) {
                 if (this.world[i].type === "Asteroid") {
-                    this.resourcesCollected += Math.round(this.world[i].size);
-                    this.introUI.resourcesCollected = this.resourcesCollected;
+                    this.introUI.resourcesCollected += Math.round(this.world[i].size);
                 }
             }
         }
@@ -1968,6 +2026,20 @@ Consequences are in order if required resources are not met.",
             } else if (this.introrobotAudio2.currentTime >= this.introrobotAudio2.duration) {
                 this.introrobotAudio2Done = true;
                 this.bgmusic.volume = 0.4;
+            }
+        } else if (!this.introrobotAudio3Done) {
+            if (!this.introUI || this.introUI.active === false) {
+                this.bgmusic.volume = 0.1;
+                this.introrobotAudio3Done = true;
+                this.Add(new InGameDialogue(WIDTH/2,HEIGHT-100,WIDTH*7/8,
+                    "Miner 4D6179, please return to the ship immediately for disciplinary action.",
+                    "30px Monospace",5500,"AUDIO_introrobot3"),"debug");
+                this.RemoveAllTypeOf("AsteroidSpawner");
+            }
+        } else if (!this.WIPAppeared) {
+            if (this.introrobotAudio3Done && this.introrobotAudio3.currentTime >= this.introrobotAudio3.duration) {
+                this.WIPAppeared = true;
+                this.Add(new InGameDialogue(WIDTH/2,100,WIDTH*5/8,"To Be Continued...","30px Monospace",-1),"debug");
             }
         }
 

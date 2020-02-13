@@ -1,5 +1,5 @@
 // Sky Hoffert
-// Constants for saeg.
+// Constants for Stymphalian Zero.
 
 // Generic Constants
 const WIDTH = 800;
@@ -16,6 +16,7 @@ var AUDIO_accel = null;
 var AUDIO_boom = null;
 var AUDIO_introrobot = null;
 var AUDIO_introrobot2 = null;
+var AUDIO_introrobot3 = null;
 
 // Load audio files depending on stage.
 // All loading will occur asynchonously. Other classes must check for completion.
@@ -37,5 +38,8 @@ function LoadAudio(s) {
     }
     if (AUDIO_introrobot2 === null && (s === "IntroLevel")) {
         AUDIO_introrobot2 = new Audio("audio/introrobot2.mp3");
+    }
+    if (AUDIO_introrobot3 === null && (s === "IntroLevel")) {
+        AUDIO_introrobot3 = new Audio("audio/introrobot3.mp3");
     }
 }

@@ -1,5 +1,5 @@
 // Sky Hoffert
-// Util for saeg.
+// Util for Stymphalian Zero.
 
 function Raycast(x,y,a,md,w,t,ss=1) {
     let dx = cosF(a);

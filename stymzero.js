@@ -1,5 +1,5 @@
 // Sky Hoffert
-// Main script for saeg.
+// Main script for Stymphalian Zero.
 
 var canvas = document.getElementById("canvas");
 canvas.width = WIDTH;
@@ -96,7 +96,7 @@ function Update() {
     frames++;
     time += dT;
     if (time > FPS_TIMER) {
-        console.log("[DEBUG] FPS = "+Math.round(frames/time*1000*10)/10);
+        console.log("[DEBUG] FPS="+Math.round(frames/time*1000*10)/10+", wl="+gameStage.world.length);
         frames = 0;
         time = 0;
     }
