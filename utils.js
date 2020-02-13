@@ -81,6 +81,14 @@ function cosF(ang) {
     return sinF(PI/2+ang);
 }
 
+function DrawArcF(c,x,y,r,n) {
+    let angIncr = TWOPI/n;
+    c.moveTo(x + r, y);
+    for (let i = 1; i < n; i++) {
+        c.lineTo(x + r*cosF(angIncr*i), y - r*sinF(angIncr*i));
+    }
+}
+
 function DrawRoundedRect(ctx, x, y, width, height, radius, fill, stroke) {
     if (typeof stroke === 'undefined') {
         stroke = true;

@@ -1157,7 +1157,8 @@ class Stars extends GameObject {
         this.type = "Stars";
         this.poss = [];
         for (let i = 0; i < this.nStars; i++) {
-            this.poss.push({x:(Math.random()-0.5)*this.size+this.x,y:(Math.random()-0.5)*this.size+this.y,s:Math.random()*2});
+            this.poss.push({x:(Math.random()-0.5)*this.size+this.x,
+                y:(Math.random()-0.5)*this.size+this.y,s:Math.random()*4});
         }
     }
 
@@ -1167,13 +1168,12 @@ class Stars extends GameObject {
     }
 
     Draw(c) {
+        // TODO: this function takes the most time of ANY... try to make it faster.
         let p = this.gameStage.camera.ScreenPosition(this.x,this.y);
 
         c.fillStyle = this.color;
         for (let i = 0; i < this.nStars; i++) {
-            c.beginPath();
-            c.arc(p.x/10+this.poss[i].x,p.y/10+this.poss[i].y,this.poss[i].s,0,TWOPI);
-            c.fill();
+            c.fillRect(p.x/10+this.poss[i].x,p.y/10-this.poss[i].y,this.poss[i].s,this.poss[i].s);
         }
     }
 }
@@ -1240,8 +1240,6 @@ class Triangle extends GameObject {
     }
 }
 
-// Rectangles are a combination of two rectangles. As of now, they can only be drawn if exactly
-// square with the viewport.
 class Rectangle extends GameObject {
     constructor(l,t,r,b,c,gs) {
         super((l+r)/2,(b+t)/2,-1,c);
@@ -1285,6 +1283,7 @@ class Pellet extends GameObject {
         this.trails = 3;
         this.trailsMax = 20;
         this.trailSpacing = 5;
+        this.drawTrails = false;
 
         this.decays = false;
 
@@ -1327,24 +1326,38 @@ class Pellet extends GameObject {
     Draw(c) {
         if (!this.gameStage.camera.InCam(this)) { return; }
 
-        let pos = this.gameStage.camera.ScreenPosition(this.x, this.y);
+        let p = this.gameStage.camera.ScreenPosition(this.x, this.y);
         let al = 1;
         if (this.decays) {
             al = this.lifetime/this.lifetimeMax;
         }
         c.beginPath();
-        c.arc(pos.x,pos.y,this.size*this.gameStage.camera.zoom,0,TWOPI);
+        DrawArcF(c,p.x,p.y,this.size*this.gameStage.camera.zoom,8);
+        c.closePath();
         c.lineWidth = 3*this.gameStage.camera.zoom;
         c.strokeStyle = this.color;
         c.globalAlpha = al;
         c.stroke();
 
-        for (let i = 0; i < this.trails; i++) {
-            let p = this.gameStage.camera.ScreenPosition(this.x - this.vx*i*this.trailSpacing, this.y - this.vy*i*this.trailSpacing);
+        if (this.drawTrails) {
+            for (let i = 0; i < this.trails; i++) {
+                c.beginPath();
+                c.moveTo(p.x,p.y);
+                p = this.gameStage.camera.ScreenPosition(this.x - this.vx*i*this.trailSpacing,
+                    this.y - this.vy*i*this.trailSpacing);
+                c.lineTo(p.x,p.y);
+                c.lineWidth = 3*this.gameStage.camera.zoom;
+                c.globalAlpha = 0.7/(i+1)*al;
+                c.strokeStyle = this.color;
+                c.stroke();
+            }
+        } else {
             c.beginPath();
-            c.arc(p.x,p.y,this.size*this.gameStage.camera.zoom,0,TWOPI);
-            c.lineWidth = 3*this.gameStage.camera.zoom;
-            c.globalAlpha = 0.7/(i+1)*al;
+            c.moveTo(p.x,p.y);
+            let t = this.gameStage.camera.ScreenPosition(this.x - this.vx*this.trails*this.trailSpacing,
+                this.y - this.vy*this.trails*this.trailSpacing);
+            c.lineTo(t.x,t.y);
+            c.globalAlpha = 0.4*al;
             c.strokeStyle = this.color;
             c.stroke();
         }
