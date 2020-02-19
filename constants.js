@@ -14,6 +14,7 @@ var AUDIO_bgmusic = null;
 var AUDIO_shoot = null;
 var AUDIO_accel = null;
 var AUDIO_boom = null;
+var AUDIO_click = null;
 var AUDIO_introrobot = null;
 var AUDIO_introrobot2 = null;
 var AUDIO_introrobot3 = null;
@@ -22,16 +23,23 @@ var AUDIO_introrobot3 = null;
 // All loading will occur asynchonously. Other classes must check for completion.
 function LoadAudio(s) {
     if (AUDIO_shoot === null && (s === "Testground" || s === "IntroLevel")) {
-        AUDIO_shoot = new Audio("audio/shoot.mp3");
+        //AUDIO_shoot = new Audio("audio/shoot.mp3");
+        // DEBUG
+        AUDIO_shoot = new Audio("audio/testlaser-007.wav");
     }
     if (AUDIO_accel === null && (s === "Testground" || s === "IntroLevel")) {
-        AUDIO_accel = new Audio("audio/accel.mp3");
+        //AUDIO_accel = new Audio("audio/accel.mp3");
+        // DEBUG
+        AUDIO_accel = new Audio("audio/testengine-008.wav");
     }
     if (AUDIO_boom === null && (s === "Testground" || s === "IntroLevel")) {
         AUDIO_boom = new Audio("audio/boom.mp3");
     }
     if (AUDIO_bgmusic === null && (s === "Testground" || s === "IntroLevel")) {
         AUDIO_bgmusic = new Audio("audio/bgmusic.mp3");
+    }
+    if (AUDIO_click === null && (s === "Testground" || s === "IntroLevel")) {
+        AUDIO_click = new Audio("audio/click.mp3");
     }
     if (AUDIO_introrobot === null && (s === "IntroLevel")) {
         AUDIO_introrobot = new Audio("audio/introrobot.mp3");

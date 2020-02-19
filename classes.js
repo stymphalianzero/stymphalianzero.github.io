@@ -1536,6 +1536,9 @@ class InGameDialogue extends GameObject {
         }
         this.height = this.paddingTB*2 + this.textLines.length*this.fontSize;
 
+        this.click = AUDIO_click;
+        this.click.volume = 0.02;
+
         if (afn === "AUDIO_introrobot") {
             AUDIO_introrobot.play();
         } else if (afn === "AUDIO_introrobot2") {
@@ -1557,6 +1560,8 @@ class InGameDialogue extends GameObject {
             if (this.nextLetterTime <= 0) {
                 this.lettersToWrite++;
                 this.nextLetterTime = this.nextLetterTimeMax;
+                this.click.currentTime = 0;
+                this.click.play();
             }
         }
     }
